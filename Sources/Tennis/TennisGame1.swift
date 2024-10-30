@@ -31,57 +31,71 @@ class TennisGame1: TennisGame {
 
     var score: String? {
         var score = ""
-        var tempScore = 0
 
         let isDraw = score1 == score2
 
+        let scoreIsEqualToOrMoreThanFour: Bool = score1 >= 4 || score2 >= 4
         if isDraw {
-            score = getScore(score1)
+            score = getScoreIfDraw(score1)
 
-        } else if score1 >= 4 || score2 >= 4 {
-            let minusResult = score1 - score2
+        } else if scoreIsEqualToOrMoreThanFour {
+            score = getScoreIfEqualOrMoreThanFour(score1, score2)
 
-            if minusResult == 1 {
-                score = "Advantage " + player1
-            } else if minusResult == -1 {
-                score = "Advantage " + player2
-            } else if minusResult >= 2 {
-                score = "Win for " + player1
-            } else {
-                score = "Win for " + player2
-            }
         } else {
-            for i in 1 ..< 3 {
-                if i == 1 {
-                    tempScore = score1
-                } else {
-                    score = "\(score)-"
-                    tempScore = score2
-                }
+            score = getScore(score1, score2)
+        }
 
-                switch tempScore {
-                case 0:
-                    score = "\(score)Love"
+        return score
+    }
 
-                case 1:
-                    score = "\(score)Fifteen"
+    func getScore(_ score1: Int, _ score2: Int) -> String {
+        var tempScore = 0
+        var score = ""
 
-                case 2:
-                    score = "\(score)Thirty"
+        for i in 1 ..< 3 {
+            if i == 1 {
+                tempScore = score1
+            } else {
+                score = "\(score)-"
+                tempScore = score2
+            }
 
-                case 3:
-                    score = "\(score)Forty"
+            switch tempScore {
+            case 0:
+                score = "\(score)Love"
 
-                default:
-                    break
-                }
+            case 1:
+                score = "\(score)Fifteen"
+
+            case 2:
+                score = "\(score)Thirty"
+
+            case 3:
+                score = "\(score)Forty"
+
+            default:
+                break
             }
         }
 
         return score
     }
 
-    func getScore(_ score: Int) -> String {
+    func getScoreIfEqualOrMoreThanFour(_ score1: Int, _ score2: Int) -> String {
+        let minusResult = score1 - score2
+
+        if minusResult == 1 {
+            return "Advantage " + player1
+        } else if minusResult == -1 {
+            return "Advantage " + player2
+        } else if minusResult >= 2 {
+            return "Win for " + player1
+        } else {
+            return "Win for " + player2
+        }
+    }
+
+    func getScoreIfDraw(_ score: Int) -> String {
         switch score {
         case 0:
             return "Love-All"
