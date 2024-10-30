@@ -8,44 +8,45 @@ import Foundation
 
 // 1- make change easy for player
 
+class Player {
+    var name: String
+    var score: Int = 0
+
+    init(name: String) {
+        self.name = name
+    }
+}
+
 class TennisGame1: TennisGame {
-    private let player1: String
-    private let player2: String
-    private var score1: Int
-    private var score2: Int
+    private let player1: Player
+    private let player2: Player
 
     required init(player1: String, player2: String) {
-        self.player1 = player1
-        self.player2 = player2
-        self.score1 = 0
-        self.score2 = 0
+        self.player1 = Player(name: player1)
+        self.player2 = Player(name: player2)
     }
 
     func wonPoint(_ playerName: String) {
         if playerName == "player1" {
-            score1 += 1
+            player1.score += 1
         } else {
-            score2 += 1
+            player2.score += 1
         }
     }
 
     var score: String? {
-        var score = ""
+        let isDraw = player1.score == player2.score
+        let scoreIsEqualToOrMoreThanFour: Bool = player1.score >= 4 || player2.score >= 4
 
-        let isDraw = score1 == score2
-
-        let scoreIsEqualToOrMoreThanFour: Bool = score1 >= 4 || score2 >= 4
         if isDraw {
-            score = getScoreIfDraw(score1)
-
-        } else if scoreIsEqualToOrMoreThanFour {
-            score = getScoreIfEqualOrMoreThanFour(score1, score2)
-
-        } else {
-            score = getScore(score1, score2)
+            return getScoreIfDraw(player1.score, player2.score)
         }
 
-        return score
+        if scoreIsEqualToOrMoreThanFour {
+            return getScoreIfEqualOrMoreThanFour(player1.score, player2.score)
+        }
+
+        return getScore(player1.score, player2.score)
     }
 
     func getScore(_ score1: Int, _ score2: Int) -> String {
@@ -56,7 +57,7 @@ class TennisGame1: TennisGame {
             if i == 1 {
                 tempScore = score1
             } else {
-                score = "\(score)-"
+                score = score + "-"
                 tempScore = score2
             }
 
@@ -85,18 +86,18 @@ class TennisGame1: TennisGame {
         let minusResult = score1 - score2
 
         if minusResult == 1 {
-            return "Advantage " + player1
+            return "Advantage " + player1.name
         } else if minusResult == -1 {
-            return "Advantage " + player2
+            return "Advantage " + player2.name
         } else if minusResult >= 2 {
-            return "Win for " + player1
+            return "Win for " + player1.name
         } else {
-            return "Win for " + player2
+            return "Win for " + player2.name
         }
     }
 
-    func getScoreIfDraw(_ score: Int) -> String {
-        switch score {
+    func getScoreIfDraw(_ score1: Int, _ score2: Int) -> String {
+        switch score1 {
         case 0:
             return "Love-All"
 
