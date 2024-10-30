@@ -8,18 +8,12 @@ import Foundation
 
 // 1- make change easy for player
 
-class Player {
-    var name: String
-    var score: Int = 0
-
-    init(name: String) {
-        self.name = name
-    }
-}
-
 class TennisGame1: TennisGame {
     private let player1: Player
     private let player2: Player
+    private let normalScore = NormalScore()
+    private let scoreIfEqualOrMoreThanFour = ScoreIfEqualOrMoreThanFour()
+    private let draw = Draw()
 
     required init(player1: String, player2: String) {
         self.player1 = Player(name: player1)
@@ -27,7 +21,7 @@ class TennisGame1: TennisGame {
     }
 
     func wonPoint(_ playerName: String) {
-        if playerName == "player1" {
+        if playerName == player1.name {
             player1.score += 1
         } else {
             player2.score += 1
@@ -39,65 +33,93 @@ class TennisGame1: TennisGame {
         let scoreIsEqualToOrMoreThanFour: Bool = player1.score >= 4 || player2.score >= 4
 
         if isDraw {
-            return getScoreIfDraw(player1.score, player2.score)
+            return draw.getScore(player1, player2)
         }
 
         if scoreIsEqualToOrMoreThanFour {
-            return getScoreIfEqualOrMoreThanFour(player1.score, player2.score)
+            return scoreIfEqualOrMoreThanFour.getScore(player1, player2)
         }
 
-        return getScore(player1.score, player2.score)
+        return normalScore.getScore(player1, player2)
     }
+}
 
-    func getScore(_ score1: Int, _ score2: Int) -> String {
+// MARK: Models
+
+class Player {
+    var name: String
+    var score: Int = 0
+
+    init(name: String) {
+        self.name = name
+    }
+}
+
+protocol ScoreCalculator {
+    func getScore(_ player1: Player, _ player2: Player) -> String
+}
+
+class NormalScore: ScoreCalculator {
+    func getScore(_ player1: Player, _ player2: Player) -> String {
         var tempScore = 0
         var score = ""
 
-        for i in 1 ..< 3 {
-            if i == 1 {
-                tempScore = score1
-            } else {
-                score = score + "-"
-                tempScore = score2
-            }
-
+        func getScore(_ tempScore: Int, _ score: String) -> String {
             switch tempScore {
             case 0:
-                score = "\(score)Love"
+                return "\(score)Love"
 
             case 1:
-                score = "\(score)Fifteen"
+                return "\(score)Fifteen"
 
             case 2:
-                score = "\(score)Thirty"
+                return "\(score)Thirty"
 
             case 3:
-                score = "\(score)Forty"
+                return "\(score)Forty"
 
             default:
-                break
+                return score
             }
         }
 
+        for i in 1 ..< 3 {
+            if i == 1 {
+                tempScore = player1.score
+            } else {
+                score = score + "-"
+                tempScore = player2.score
+            }
+
+            score = getScore(tempScore, score)
+        }
         return score
     }
+}
 
-    func getScoreIfEqualOrMoreThanFour(_ score1: Int, _ score2: Int) -> String {
-        let minusResult = score1 - score2
+class ScoreIfEqualOrMoreThanFour: ScoreCalculator {
+    func getScore(_ player1: Player, _ player2: Player) -> String {
+        let minusResult = player1.score - player2.score
 
         if minusResult == 1 {
             return "Advantage " + player1.name
-        } else if minusResult == -1 {
-            return "Advantage " + player2.name
-        } else if minusResult >= 2 {
-            return "Win for " + player1.name
-        } else {
-            return "Win for " + player2.name
         }
-    }
 
-    func getScoreIfDraw(_ score1: Int, _ score2: Int) -> String {
-        switch score1 {
+        if minusResult == -1 {
+            return "Advantage " + player2.name
+        }
+
+        if minusResult >= 2 {
+            return "Win for " + player1.name
+        }
+
+        return "Win for " + player2.name
+    }
+}
+
+class Draw: ScoreCalculator {
+    func getScore(_ player1: Player, _ player2: Player) -> String {
+        switch player1.score {
         case 0:
             return "Love-All"
 
